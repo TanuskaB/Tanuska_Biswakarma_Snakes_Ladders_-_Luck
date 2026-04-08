@@ -8,6 +8,11 @@ if (!is_logged_in()) {
     exit;
 }
 
+// Clear session game when starting a new one
+if (isset($_GET['new'])) {
+    unset($_SESSION['game']);
+}
+
 $game             = get_game_state();
 $narrator_message = '';
 $winner           = null;
@@ -17,9 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $difficulty   = $_POST['difficulty'];
         $players      = (int)$_POST['players'];
         $player1_name = sanitize($_POST['player1_name'] ?? get_logged_user() ?? 'Player 1');
-        $player2_name = sanitize($_POST['player2_name'] ?? 'Player 2');
+        $player2_name = $players === 1 ? 'CPU' : sanitize($_POST['player2_name'] ?? 'Player 2');
         init_game($difficulty, $players);
-        // Patch player names directly into session after init
         $_SESSION['game']['player_names'] = [
             0 => $player1_name ?: (get_logged_user() ?? 'Player 1'),
             1 => $player2_name ?: 'Player 2'
@@ -56,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($bonus) {
                 $narrator_message = get_narrator_message($bonus, []);
                 $move_type = $bonus;
-                // Apply bonus effects
                 if ($bonus == 'extra_roll') {
                     // Allow extra roll, don't switch player
                 } elseif ($bonus == 'skip_turn') {
@@ -65,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
 
-            // Store last roll and move type so dice face and narrator color persist after reload
             $game['last_roll']     = $roll;
             $game['last_type']     = $move_type;
             $game['last_narrator'] = $narrator_message;
@@ -80,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $game['winner']      = $current_player;
                 $game['time_played'] = $time_played;
             } else {
-                // Switch player if not extra roll
                 if (!$bonus || $bonus != 'extra_roll') {
                     do {
                         $game['current_player'] = ($game['current_player'] + 1) % count($game['positions']);
@@ -97,7 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-//If no active game show setup form
+
+// If no active game show setup form
 if (!$game) {
     ?>
     <!DOCTYPE html>
@@ -135,7 +137,8 @@ if (!$game) {
                             maxlength="20"
                             required>
                 </div>
-                    <div class="form-group">
+
+                <div class="form-group">
                     <label>👥 Game Mode:</label>
                     <div class="mode-toggle">
                         <label class="mode-option">
@@ -149,12 +152,12 @@ if (!$game) {
                     </div>
                 </div>
 
-                <div class="form-group" id="player2Group">
-                    <label for="player2_name">🟢 Player 2 Name:</label>
+                <div class="form-group">
+                    <label for="player2_name">🟢 Player 2 Name: </label>
                     <input type="text"
                             name="player2_name"
                             id="player2_name"
-                            placeholder="Enter Player 2 name"
+                            placeholder="Enter Player 2 name or leave blank for CPU"
                             maxlength="20">
                 </div>
 
@@ -170,31 +173,12 @@ if (!$game) {
                 <button type="submit" name="start_game" style="width:100%;">🚀 Start Game!</button>
             </form>
         </div>
-            <script>
-            var soloBtn = document.getElementById('solo');
-            var multiBtn = document.getElementById('multi');
-            var p2Group = document.getElementById('player2Group');
-            var p2Input = document.getElementById('player2_name');
-            function updateMode() {
-                if (soloBtn.checked) {
-                    p2Group.style.display = 'none';
-                    p2Input.value = 'CPU';
-                } else {
-                    p2Group.style.display = 'block';
-                    if (p2Input.value === 'CPU') p2Input.value = '';
-                }
-            }
-            soloBtn.addEventListener('change', updateMode);
-            multiBtn.addEventListener('change', updateMode);
-            updateMode();
-        </script>
     </div>
     </body>
     </html>
     <?php
     exit;
 }
-
 
 // Restore winner and narrator from session after reload
 if (isset($game['winner'])) $winner = $game['winner'];
@@ -212,7 +196,6 @@ $popup_msg  = $game['last_narrator'] ?? '';
 $big_events = ['snake', 'ladder', 'bonus', 'extra_roll', 'skip_turn', 'mystery_boost', 'warp', 'skip', 'penalty'];
 $show_popup = in_array($popup_type, $big_events) && $popup_msg !== '';
 
-// Also show popup on win
 if ($winner !== null) {
     $show_popup  = true;
     $popup_type  = 'win';
@@ -308,7 +291,7 @@ function generate_board($game) {
         <h1>Snakes, Ladders &amp; Luck</h1>
 
         <?php if ($winner !== null): ?>
-        <!-- Confetti  -->
+        <!-- Confetti -->
         <div class="confetti-wrap" aria-hidden="true">
             <?php
             $colors = ['#667eea','#ff6b9d','#51cf66','#ffd93d','#00d4ff','#ff6b6b','#764ba2','#ff9d3d','#a9e34b'];
@@ -334,15 +317,15 @@ function generate_board($game) {
         <?php endif; ?>
 
         <nav class="site-nav">
-            <a href="index.php">&#x1F3E0; Home</a>
-            <a href="howtoplay.php">&#x1F4D6; How to Play</a>
-            <a href="leaderboard.php">&#x1F3C6; Leaderboard</a>
-            <span class="nav-user">&#x1F464; <?= htmlspecialchars(get_logged_user()) ?></span>
-            <a href="logout.php">&#x1F6AA; Logout</a>
+            <a href="index.php">🏠 Home</a>
+            <a href="howtoplay.php">📖 How to Play</a>
+            <a href="leaderboard.php">🏆 Leaderboard</a>
+            <span class="nav-user">👤 <?= htmlspecialchars(get_logged_user()) ?></span>
+            <a href="logout.php">🚪 Logout</a>
         </nav>
         
         <?php if ($winner !== null): ?>
-            <!-- Win Screen and Adventure Recap-->
+            <!-- Win Screen and Adventure Recap -->
             <div class="winner-banner">
                 <h2>🎉 <?= htmlspecialchars($player_names[$winner]) ?> Wins! 🎉</h2>
                 <p>Time: <strong><?= gmdate("H:i:s", $game['time_played'] ?? 0) ?></strong>
@@ -350,7 +333,7 @@ function generate_board($game) {
                     &nbsp;|&nbsp; Difficulty: <strong><?= ucfirst($game['difficulty']) ?></strong></p>
             </div>
 
-            <!-- Adventure Recap  -->
+            <!-- Adventure Recap -->
             <div class="adventure-recap">
                 <h3>📜 Adventure Recap</h3>
                 <?php if (!empty($game['events_log'])): ?>
@@ -373,14 +356,14 @@ function generate_board($game) {
                     <?php endforeach; ?>
                 </ul>
                 <?php else: ?>
-                <p>A clean run there was no snakes, ladders, or events triggered!</p>
+                <p>A clean run — no snakes, ladders, or events triggered!</p>
                 <?php endif; ?>
             </div>
 
             <p style="text-align:center; margin-top:20px;">
                 <a href="leaderboard.php">📊 View Leaderboard</a>
                 &nbsp;&nbsp;
-                <a href="index.php">🎮 Play Again</a>
+                <a href="game.php?new=1">🎮 Play Again</a>
             </p>
 
         <?php else: ?>
@@ -396,23 +379,23 @@ function generate_board($game) {
                 <div class="symbols-list">
                     <div class="symbol-item">
                         <span class="symbol">🐍</span>
-                        <span class="description">Snake : Slide down to a lower number!</span>
+                        <span class="description">Snake - Slide down to a lower number!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">🪜</span>
-                        <span class="description">Ladder : Climb up to a higher number!</span>
+                        <span class="description">Ladder - Climb up to a higher number!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">⚡</span>
-                        <span class="description">Event : Special random events that can help or hinder!</span>
+                        <span class="description">Event - Special random events that can help or hinder!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">⭐</span>
-                        <span class="description">Bonus : Lucky tiles that give extra rolls or special advantages!</span>
+                        <span class="description">Bonus - Lucky tiles that give extra rolls or special advantages!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">🎯</span>
-                        <span class="description">Player Token : Shows where each player is on the board!</span>
+                        <span class="description">Player Token - Shows where each player is on the board!</span>
                     </div>
                 </div>
             </div>
@@ -430,10 +413,9 @@ function generate_board($game) {
                                 <?= htmlspecialchars($player_names[$p]) ?>
                             </div>
                             <div class="player-position"><?php echo $pos; ?>/100</div>
-                            <!-- Progress bar -->
                             <div class="progress-wrap">
                                 <div class="progress-bar player<?= $p + 1 ?>-bar"
-                                    style="width:<?= $pos ?>%"></div>
+                                        style="width:<?= $pos ?>%"></div>
                             </div>
                             <div class="progress-label"><?= $pos ?>% to finish</div>
                             <div class="player-status">
@@ -448,7 +430,6 @@ function generate_board($game) {
                         </div>
                     <?php endforeach; ?>
 
-                    <!-- Animated dice face -->
                     <div class="dice-panel">
                         <div class="dice-face <?= $last_roll ? 'rolled' : '' ?>">
                             <?= $last_roll ? $dice_faces[$last_roll] : '🎲' ?>
