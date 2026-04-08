@@ -215,7 +215,7 @@ function generate_board($game) {
         <h1>Snakes, Ladders &amp; Luck</h1>
 
         <?php if ($winner !== null): ?>
-        <!-- Confetti — pure CSS, 18 pieces -->
+        <!-- Confetti  -->
         <div class="confetti-wrap" aria-hidden="true">
             <?php
             $colors = ['#667eea','#ff6b9d','#51cf66','#ffd93d','#00d4ff','#ff6b6b','#764ba2','#ff9d3d','#a9e34b'];
