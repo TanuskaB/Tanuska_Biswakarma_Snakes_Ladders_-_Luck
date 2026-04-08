@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (check_win($new_pos)) {
                 $winner = $current_player;
                 $time_played = time() - $game['start_time'];
-                update_leaderboard($game['player_names'][$current_player], $time_played, $game['difficulty']);
+                update_leaderboard($game['player_names'][$current_player], $time_played, $game['difficulty'], $game['turn_count']);
                 $game['winner']      = $current_player;
                 $game['time_played'] = $time_played;
             } else {
@@ -214,11 +214,38 @@ function generate_board($game) {
     <div class="container">
         <h1>Snakes, Ladders &amp; Luck</h1>
 
+        <?php if ($winner !== null): ?>
+        <!-- Confetti — pure CSS, 18 pieces -->
+        <div class="confetti-wrap" aria-hidden="true">
+            <?php
+            $colors = ['#667eea','#ff6b9d','#51cf66','#ffd93d','#00d4ff','#ff6b6b','#764ba2','#ff9d3d','#a9e34b'];
+            for ($c = 1; $c <= 18; $c++):
+                $color = $colors[($c - 1) % count($colors)];
+                $left  = rand(2, 98);
+                $delay = round(($c * 0.18), 2);
+                $dur   = round(1.8 + ($c % 5) * 0.25, 2);
+                $size  = rand(8, 16);
+                $shape = $c % 3 === 0 ? 'border-radius:50%' : ($c % 3 === 1 ? 'border-radius:2px;transform:rotate(45deg)' : '');
+            ?>
+            <div class="confetti-piece" style="
+                left:<?= $left ?>%;
+                background:<?= $color ?>;
+                width:<?= $size ?>px;
+                height:<?= $size ?>px;
+                animation-delay:<?= $delay ?>s;
+                animation-duration:<?= $dur ?>s;
+                <?= $shape ?>
+            "></div>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
+
         <nav class="site-nav">
-            <a href="index.php">🏠 Home</a>
-            <a href="leaderboard.php">🏆 Leaderboard</a>
-            <span class="nav-user">👤 <?= htmlspecialchars(get_logged_user()) ?></span>
-            <a href="logout.php">🚪 Logout</a>
+            <a href="index.php">&#x1F3E0; Home</a>
+            <a href="howtoplay.php">&#x1F4D6; How to Play</a>
+            <a href="leaderboard.php">&#x1F3C6; Leaderboard</a>
+            <span class="nav-user">&#x1F464; <?= htmlspecialchars(get_logged_user()) ?></span>
+            <a href="logout.php">&#x1F6AA; Logout</a>
         </nav>
         
         <?php if ($winner !== null): ?>
@@ -226,8 +253,8 @@ function generate_board($game) {
             <div class="winner-banner">
                 <h2>🎉 <?= htmlspecialchars($player_names[$winner]) ?> Wins! 🎉</h2>
                 <p>Time: <strong><?= gmdate("H:i:s", $game['time_played'] ?? 0) ?></strong>
-                &nbsp;|&nbsp; Turns: <strong><?= $game['turn_count'] ?></strong>
-                &nbsp;|&nbsp; Difficulty: <strong><?= ucfirst($game['difficulty']) ?></strong></p>
+                    &nbsp;|&nbsp; Turns: <strong><?= $game['turn_count'] ?></strong>
+                    &nbsp;|&nbsp; Difficulty: <strong><?= ucfirst($game['difficulty']) ?></strong></p>
             </div>
 
             <!-- Adventure Recap  -->
@@ -264,7 +291,7 @@ function generate_board($game) {
             </p>
 
         <?php else: ?>
-            <!--Active Game -->
+            <!-- Active Game -->
             <div class="game-info">
                 <div>👤 <?= htmlspecialchars($player_names[$game['current_player']]) ?>'s Turn</div>
                 <div>📍 Turn: <?php echo $game['turn_count']; ?></div>
@@ -276,23 +303,23 @@ function generate_board($game) {
                 <div class="symbols-list">
                     <div class="symbol-item">
                         <span class="symbol">🐍</span>
-                        <span class="description">Snake - Slide down to a lower number!</span>
+                        <span class="description">Snake : Slide down to a lower number!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">🪜</span>
-                        <span class="description">Ladder - Climb up to a higher number!</span>
+                        <span class="description">Ladder : Climb up to a higher number!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">⚡</span>
-                        <span class="description">Event - Special random events that can help or hinder!</span>
+                        <span class="description">Event : Special random events that can help or hinder!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">⭐</span>
-                        <span class="description">Bonus - Lucky tiles that give extra rolls or special advantages!</span>
+                        <span class="description">Bonus : Lucky tiles that give extra rolls or special advantages!</span>
                     </div>
                     <div class="symbol-item">
                         <span class="symbol">🎯</span>
-                        <span class="description">Player Token - Shows where each player is on the board!</span>
+                        <span class="description">Player Token : Shows where each player is on the board!</span>
                     </div>
                 </div>
             </div>

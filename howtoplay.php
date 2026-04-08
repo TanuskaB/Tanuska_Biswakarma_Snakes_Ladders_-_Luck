@@ -59,10 +59,10 @@ require_once 'functions.php';
 
         <!-- Rules -->
         <div class="rules-row">
-            <div class="rule-badge snake-rule">&#x1F40D; Snake &mdash; slides you DOWN</div>
-            <div class="rule-badge ladder-rule">&#x1FA9C; Ladder &mdash; shoots you UP</div>
-            <div class="rule-badge event-rule">&#x26A1; Event &mdash; random twist!</div>
-            <div class="rule-badge bonus-rule">&#x2B50; Bonus &mdash; lucky reward!</div>
+            <div class="rule-badge snake-rule">&#x1F40D; Snake : slides you DOWN</div>
+            <div class="rule-badge ladder-rule">&#x1FA9C; Ladder : shoots you UP</div>
+            <div class="rule-badge event-rule">&#x26A1; Event : random twist!</div>
+            <div class="rule-badge bonus-rule">&#x2B50; Bonus : lucky reward!</div>
         </div>
 
         <!-- Special tiles -->
