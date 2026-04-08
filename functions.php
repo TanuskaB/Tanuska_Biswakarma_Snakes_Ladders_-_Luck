@@ -11,34 +11,31 @@ function roll_dice() {
 // Move player position
 function move_player($current_pos, $roll, $board) {
     $new_pos = $current_pos + $roll;
+
     if ($new_pos > 100) {
         $new_pos = 100 - ($new_pos - 100); // Bounce back if over 100
     }
-    $type = 'normal';
-    $to = $new_pos;
+
+    $type   = 'normal';
+    $landed = $new_pos;
+    $to     = $new_pos;
+
     // Check snakes and ladders
     if (isset($board['snakes'][$new_pos])) {
-        $to = $board['snakes'][$new_pos];
+        $to   = $board['snakes'][$new_pos];
         $type = 'snake';
     } elseif (isset($board['ladders'][$new_pos])) {
-        $to = $board['ladders'][$new_pos];
+        $to   = $board['ladders'][$new_pos];
         $type = 'ladder';
     }
-    return ['pos' => $to, 'type' => $type, 'from' => $new_pos];
+
+    return ['pos' => $to, 'type' => $type, 'from' => $landed];
 }
 
 // Check for events
 function check_event($pos, $turn_number) {
     global $event_cells;
-    if (!isset($event_cells[$pos])) {
-        return null;
-    }
-    $event = $event_cells[$pos];
-    // Seed rand with turn number for reproducibility
-    srand($turn_number);
-    // But since it's random, maybe just return the event
-    // For simplicity, always trigger the event
-    return $event;
+    return isset($event_cells[$pos]) ? $event_cells[$pos] : null;
 }
 
 // Apply event
@@ -46,7 +43,7 @@ function apply_event($event, &$pos) {
     switch ($event['type']) {
         case 'bonus':
         case 'penalty':
-            $pos += $event['move'];
+            $pos = max(1, min(100, $pos + $event['move']));
             break;
         case 'warp':
             $pos = min(100, $pos + $event['move']);
@@ -64,17 +61,14 @@ function check_bonus($pos) {
     return isset($bonus_tiles[$pos]) ? $bonus_tiles[$pos] : null;
 }
 
-// Apply bonus
-function apply_bonus($bonus_type) {
-    // Return effect
-    return $bonus_type;
-}
-
 // Generate narrator message
 function get_narrator_message($type, $data) {
     global $narrator_templates;
     $template = $narrator_templates[$type] ?? "Something happened!";
-    return str_replace(array_keys($data), array_values($data), $template);
+    foreach ($data as $key => $value) {
+        $template = str_replace($key, $value, $template);
+    }
+    return $template;
 }
 
 // Check win
@@ -83,18 +77,36 @@ function check_win($pos) {
 }
 
 // Initialize game session
-function init_game($difficulty, $players = 1) {
+function init_game($difficulty, $player2_name = 'Player 2', $players = 2) {
+    global $boards;
+
+    if (is_int($player2_name)) {
+        $players      = $player2_name;
+        $player2_name = 'Player 2';
+    }
+
+    $players = max(1, (int)$players);
+
+    $player_names = [
+        0 => get_logged_user() ?? 'Player 1',
+        1 => $player2_name ?: 'Player 2'
+    ];
+
     $_SESSION['game'] = [
-        'difficulty' => $difficulty,
-        'board' => $GLOBALS['boards'][$difficulty],
-        'positions' => array_fill(0, $players, 0),
+        'difficulty'     => $difficulty,
+        'board'          => $boards[$difficulty],
+        'positions'      => array_fill(0, $players, 1),
+        'player_names'   => $player_names,
         'current_player' => 0,
-        'turn_count' => 0,
-        'dice_history' => [],
-        'events_log' => [],
-        'last_event' => null,
-        'start_time' => time(),
-        'skipped_turns' => array_fill(0, $players, false)
+        'turn_count'     => 0,
+        'dice_history'   => [],
+        'events_log'     => [],
+        'last_event'     => null,
+        'last_type'      => 'normal',
+        'last_narrator'  => '',
+        'last_roll'      => null,
+        'start_time'     => time(),
+        'skipped_turns'  => array_fill(0, $players, false)
     ];
 }
 
@@ -104,22 +116,25 @@ function get_game_state() {
 }
 
 // Update leaderboard
-function update_leaderboard($player_name, $time, $difficulty) {
+function update_leaderboard($player_name, $time_seconds, $difficulty) {
     if (!isset($_SESSION['leaderboard'])) {
         $_SESSION['leaderboard'] = [];
     }
     $_SESSION['leaderboard'][] = [
-        'player' => $player_name,
-        'time' => $time,
+        'player'     => htmlspecialchars($player_name, ENT_QUOTES, 'UTF-8'),
+        'time'       => $time_seconds,
         'difficulty' => $difficulty,
-        'timestamp' => time()
+        'timestamp'  => time()
     ];
-    // Sort by time ascending
-    usort($_SESSION['leaderboard'], function($a, $b) {
-        return $a['time'] <=> $b['time'];
-    });
+    // Sort by fastest time
+    usort($_SESSION['leaderboard'], fn($a, $b) => $a['time'] <=> $b['time']);
     // Keep top 10
     $_SESSION['leaderboard'] = array_slice($_SESSION['leaderboard'], 0, 10);
+}
+
+// Get leaderboard scores
+function get_scores() {
+    return $_SESSION['leaderboard'] ?? [];
 }
 
 // Authentication functions
@@ -127,18 +142,23 @@ function register_user($username, $password) {
     if (!isset($_SESSION['users'])) {
         $_SESSION['users'] = [];
     }
-    if (isset($_SESSION['users'][$username])) {
-        return false; // User exists
+    // Check case-insensitively
+    foreach ($_SESSION['users'] as $key => $hash) {
+        if (strtolower($key) === strtolower($username)) return false;
     }
     $_SESSION['users'][$username] = password_hash($password, PASSWORD_DEFAULT);
     return true;
 }
 
 function login_user($username, $password) {
-    if (!isset($_SESSION['users'][$username])) {
-        return false;
+    if (!isset($_SESSION['users'])) return false;
+    // Check case-insensitively
+    foreach ($_SESSION['users'] as $key => $hash) {
+        if (strtolower($key) === strtolower($username)) {
+            return password_verify($password, $hash);
+        }
     }
-    return password_verify($password, $_SESSION['users'][$username]);
+    return false;
 }
 
 function is_logged_in() {
@@ -158,29 +178,23 @@ function sanitize($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
-// Validate form
+// Validate registration form
 function validate_registration($username, $password, $confirm) {
     $errors = [];
-    if (empty($username) || strlen($username) < 3) {
+    if (empty($username) || strlen($username) < 3)
         $errors[] = "Username must be at least 3 characters.";
-    }
-    if (empty($password) || strlen($password) < 6) {
+    if (empty($password) || strlen($password) < 6)
         $errors[] = "Password must be at least 6 characters.";
-    }
-    if ($password !== $confirm) {
+    if ($password !== $confirm)
         $errors[] = "Passwords do not match.";
-    }
     return $errors;
 }
 
+// Validate login form
 function validate_login($username, $password) {
     $errors = [];
-    if (empty($username)) {
-        $errors[] = "Username is required.";
-    }
-    if (empty($password)) {
-        $errors[] = "Password is required.";
-    }
+    if (empty($username)) $errors[] = "Username is required.";
+    if (empty($password)) $errors[] = "Password is required.";
     return $errors;
 }
 ?>

@@ -1,4 +1,4 @@
-/* style.css - Styles for Snakes and Ladders game - Student/Casual Friendly */
+/* style.css - Styles for Snakes and Ladders game  */
 
 * {
     box-sizing: border-box;
@@ -25,6 +25,7 @@ body {
 h1 {
     text-align: center;
     background: linear-gradient(90deg, #667eea 0%, #764ba2 25%, #ff6b9d 50%, #00d4ff 75%, #51cf66 100%);
+    background-size: 200% auto;
     color: white;
     padding: 25px;
     border-radius: 15px;
@@ -32,6 +33,7 @@ h1 {
     margin: 0 0 20px 0;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     letter-spacing: 2px;
+    animation: adventureTitle 4s linear infinite;
 }
 
 h2 {
@@ -95,6 +97,7 @@ h3 {
 .player-card.active {
     transform: scale(1.05);
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: glowPulse 1.5s ease-in-out infinite;
 }
 
 .player-name {
@@ -121,16 +124,15 @@ h3 {
     grid-template-columns: repeat(10, 1fr);
     gap: 3px;
     margin: 0 auto;
-    width: fit-content;
+    width: 100%;
     background: linear-gradient(135deg, #667eea 0%, #00d4ff 50%, #ff6b9d 100%);
-    padding: 10px;
+    padding: 8px;
     border-radius: 8px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 .cell {
-    width: 50px;
-    height: 50px;
+    aspect-ratio: 1;
     border: 2px solid #333;
     display: flex;
     align-items: center;
@@ -142,6 +144,8 @@ h3 {
     border-radius: 4px;
     transition: all 0.3s ease;
     cursor: pointer;
+    overflow: hidden;
+    min-width: 0;
 }
 
 .cell:hover {
@@ -154,6 +158,7 @@ h3 {
     color: white;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     font-weight: bold;
+    animation: snakePulse 3s ease-in-out infinite;
 }
 
 .cell.snake::before {
@@ -166,6 +171,7 @@ h3 {
     background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
     color: white;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    animation: ladderGlow 3s ease-in-out infinite;
 }
 
 .cell.ladder::before {
@@ -190,18 +196,13 @@ h3 {
     background: linear-gradient(135deg, #9c27b0 0%, #e91e63 100%);
     color: white;
     box-shadow: 0 0 12px rgba(233, 30, 99, 0.7);
-    animation: pulse 2s infinite;
+    animation: bonusShine 2s infinite;
 }
 
 .cell.bonus::before {
     content: "⭐";
     position: absolute;
     font-size: 14px;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
 }
 
 .cell.player1 {
@@ -220,6 +221,7 @@ h3 {
     border: 3px solid #00d4ff;
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.9);
     transform: scale(1.1);
+    animation: activeCellPulse 1s ease-in-out infinite;
 }
 
 .token {
@@ -346,6 +348,7 @@ button:active {
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0, 212, 255, 0.3);
     font-size: 17px;
+    animation: narratorAppear 0.4s ease;
 }
 
 .narrator h3 {
@@ -490,13 +493,7 @@ a:hover {
         grid-template-columns: 1fr;
     }
     
-    .board {
-        grid-template-columns: repeat(8, 1fr);
-    }
-    
     .cell {
-        width: 40px;
-        height: 40px;
         font-size: 9px;
     }
     
@@ -581,3 +578,334 @@ a:hover {
         font-size: 14px;
     }
 }
+
+/* Animation keyframes */
+
+/* h1 gradient shift */
+@keyframes adventureTitle {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Active player card gold glow pulse */
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 8px 20px rgba(0,212,255,0.4); }
+    50%       { box-shadow: 0 8px 32px rgba(0,212,255,0.85), 0 0 0 3px rgba(0,212,255,0.2); }
+}
+
+/* Snake cell danger shimmer */
+@keyframes snakePulse {
+    0%, 100% { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    50%       { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 10px rgba(255,107,107,0.7); }
+}
+
+/* Ladder cell green glow */
+@keyframes ladderGlow {
+    0%, 100% { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    50%       { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(81,207,102,0.8); }
+}
+
+/* Cell shine and scale */
+@keyframes bonusShine {
+    0%, 100% { transform: scale(1);    box-shadow: 0 0 12px rgba(233,30,99,0.7); }
+    50%       { transform: scale(1.07); box-shadow: 0 0 22px rgba(233,30,99,1); }
+}
+
+/* Active cell cyan pulse */
+@keyframes activeCellPulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(0,212,255,0.7); }
+    50%       { box-shadow: 0 0 28px rgba(0,212,255,1); }
+}
+
+/* Narrator slides in from above */
+@keyframes narratorAppear {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* Winner banner pop-in */
+@keyframes popIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+/* Winner banner color shift */
+@keyframes bannerShift {
+    0%, 100% { background-position: 0% center; }
+    50%       { background-position: 100% center; }
+}
+
+/* Adventure recap entrance tilt */
+@keyframes rustleIn {
+    from { transform: rotate(-4deg) scale(0.92); opacity: 0; }
+    to   { transform: rotate(0deg)  scale(1);    opacity: 1; }
+}
+
+/* Token landing animations  */
+.token.snake-token {
+    animation: slideDown 0.7s ease forwards;
+}
+@keyframes slideDown {
+    0%   { transform: translateY(-12px); opacity: 0.5; }
+    60%  { transform: translateY(4px); }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.token.ladder-token {
+    animation: climbUp 0.7s ease forwards;
+}
+@keyframes climbUp {
+    0%   { transform: translateY(12px); opacity: 0.5; }
+    60%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/*  Narrator colour variants  */
+.narrator-snake   { border-color: #ff6b6b !important; background: linear-gradient(135deg, #ffe0e0, #fff3bf) !important; }
+.narrator-ladder  { border-color: #51cf66 !important; background: linear-gradient(135deg, #e0ffe8, #e0f7ff) !important; }
+.narrator-bonus,
+.narrator-extra_roll,
+.narrator-mystery_boost { border-color: #9c27b0 !important; background: linear-gradient(135deg, #f3e0ff, #e0f7ff) !important; }
+.narrator-skip,
+.narrator-skip_turn     { border-color: #ffd93d !important; background: linear-gradient(135deg, #fffbe0, #e0f7ff) !important; }
+.narrator-penalty { border-color: #ff9d3d !important; background: linear-gradient(135deg, #fff0e0, #fff3bf) !important; }
+.narrator-warp    { border-color: #00d4ff !important; background: linear-gradient(135deg, #e0f7ff, #e0e7ff) !important; }
+
+/* Roll button glow variants */
+.roll-btn.snake        { box-shadow: 0 5px 20px rgba(255,107,107,0.6); }
+.roll-btn.ladder       { box-shadow: 0 5px 20px rgba(81,207,102,0.6); }
+.roll-btn.bonus,
+.roll-btn.extra_roll   { box-shadow: 0 5px 20px rgba(156,39,176,0.6); }
+
+/* Navbar  */
+.site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #f0e7ff, #e0f7ff);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 22px;
+    font-weight: bold;
+}
+.site-nav a      { color: #764ba2; font-size: 1em; }
+.site-nav a:hover { color: #ff6b9d; }
+.nav-user        { color: #667eea; font-size: 0.95em; }
+
+/* btn-link */
+.btn-link {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2, #ff6b9d);
+    color: white !important;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.05em;
+    text-decoration: none !important;
+    box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255,107,157,0.5);
+    text-shadow: none;
+}
+
+/*  Progress bar*/
+.progress-wrap {
+    background: #e9e0ff;
+    border-radius: 20px;
+    height: 12px;
+    margin: 8px 0 3px;
+    overflow: hidden;
+    border: 1px solid #c5b8f0;
+}
+.progress-bar {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    min-width: 4px;
+}
+.player1-bar { background: linear-gradient(90deg, #ff9999, #ff0000); }
+.player2-bar { background: linear-gradient(90deg, #99ff99, #00aa00); }
+.progress-label { font-size: 0.78em; color: #888; text-align: right; margin-bottom: 6px; }
+
+/*  Animated dice face  */
+.dice-panel {
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(102,126,234,0.2);
+    margin-top: 4px;
+}
+.dice-face {
+    font-size: 4rem;
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+    transition: transform 0.15s ease;
+}
+.dice-face.rolled { animation: diceSpin 0.5s ease; }
+@keyframes diceSpin {
+    0%   { transform: rotate(0deg)   scale(1);    opacity: 1; }
+    25%  { transform: rotate(25deg)  scale(1.25); opacity: 0.7; }
+    50%  { transform: rotate(-20deg) scale(0.9);  opacity: 0.5; }
+    75%  { transform: rotate(10deg)  scale(1.15); opacity: 0.8; }
+    100% { transform: rotate(0deg)   scale(1);    opacity: 1; }
+}
+.dice-label { font-size: 0.88em; color: #764ba2; font-weight: bold; margin: 0; }
+
+/* Winner banner*/
+.winner-banner {
+    text-align: center;
+    background: linear-gradient(90deg, #667eea, #764ba2, #ff6b9d, #00d4ff, #667eea);
+    background-size: 200% auto;
+    border-radius: 14px;
+    padding: 22px;
+    margin: 10px 0 20px;
+    box-shadow: 0 6px 20px rgba(102,126,234,0.45);
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1), bannerShift 5s ease 0.5s infinite;
+}
+.winner-banner h2 { color: white; margin: 0 0 8px; text-shadow: 1px 2px 4px rgba(0,0,0,0.25); }
+.winner-banner p  { color: rgba(255,255,255,0.9); font-size: 1.05em; margin: 0; }
+
+/* Adventure recap  */
+.adventure-recap {
+    background: linear-gradient(135deg, #f0e7ff, #e0f7ff);
+    border: 3px solid #764ba2;
+    border-radius: 14px;
+    padding: 22px;
+    margin: 22px 0;
+    animation: rustleIn 0.5s ease;
+}
+.adventure-recap h3 { color: #764ba2; margin: 0 0 6px; font-size: 22px; }
+.recap-subtitle     { color: #888; font-size: 0.92em; margin-bottom: 14px; }
+
+.recap-list {
+    list-style: none;
+    padding: 0; margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.recap-list li {
+    background: white;
+    border-left: 4px solid #667eea;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    transition: transform 0.2s ease;
+}
+.recap-list li:hover { transform: translateX(6px); }
+
+.recap-turn   { background: #667eea; color: white;  border-radius: 5px; padding: 2px 8px; font-size: 0.82em; font-weight: bold; white-space: nowrap; }
+.recap-player { background: #ff6b9d; color: white;  border-radius: 5px; padding: 2px 8px; font-size: 0.82em; font-weight: bold; white-space: nowrap; }
+
+/*  Event popup  */
+.event-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    z-index: 999;
+    border-radius: 20px;
+    padding: 30px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    pointer-events: none;
+    animation: popupIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards,
+                popupOut 0.4s ease 2s forwards;
+}
+
+@keyframes popupIn {
+    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    to   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+}
+
+@keyframes popupOut {
+    from { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+    to   { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+}
+
+.popup-inner { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+.popup-icon { font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+
+.popup-msg {
+    font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+    text-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+    max-width: 300px;
+}
+
+/* Popup colour per event type */
+.popup-snake   { background: linear-gradient(135deg, #c1121f, #ff6b6b); border: 4px solid #ff9999; }
+.popup-ladder  { background: linear-gradient(135deg, #2b8a3e, #51cf66); border: 4px solid #99ff99; }
+.popup-bonus,
+.popup-mystery_boost { background: linear-gradient(135deg, #6a0dad, #9c27b0); border: 4px solid #e0b0ff; }
+.popup-extra_roll    { background: linear-gradient(135deg, #667eea, #764ba2); border: 4px solid #c5b3f0; }
+.popup-skip,
+.popup-skip_turn     { background: linear-gradient(135deg, #e67e22, #f4a261); border: 4px solid #ffd6aa; }
+.popup-penalty { background: linear-gradient(135deg, #d35400, #e67e22); border: 4px solid #ffd6aa; }
+.popup-warp    { background: linear-gradient(135deg, #0077b6, #00d4ff); border: 4px solid #b3ecff; }
+.popup-win     { background: linear-gradient(135deg, #667eea, #764ba2, #ff6b9d); border: 4px solid #ffd700; }
+
+/* Game mode toggle */
+.mode-toggle {
+    display: flex;
+    gap: 12px;
+}
+
+.mode-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.mode-option input[type="radio"] {
+    display: none;
+}
+
+.mode-btn {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 3px solid #ddd;
+    background: #fafafa;
+    font-weight: bold;
+    font-size: 15px;
+    color: #764ba2;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.mode-option input[type="radio"]:checked + .mode-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    transform: translateY(-2px);
+}
+
+.mode-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+/* Logout box  */
+.logout-box  { text-align: center; padding: 40px 20px; }
+.logout-icon { font-size: 4rem; display: block; margin-bottom: 12px; }
+.logout-box h2 { color: #764ba2; margin-bottom: 8px; }
+.logout-box p  { color: #888; }

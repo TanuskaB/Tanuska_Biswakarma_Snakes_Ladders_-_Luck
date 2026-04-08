@@ -8,15 +8,22 @@ if (!is_logged_in()) {
     exit;
 }
 
-$game = get_game_state();
+$game             = get_game_state();
 $narrator_message = '';
-$winner = null;
+$winner           = null;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['start_game'])) {
-        $difficulty = $_POST['difficulty'];
-        $players = (int)$_POST['players'];
+        $difficulty   = $_POST['difficulty'];
+        $players      = (int)$_POST['players'];
+        $player1_name = sanitize($_POST['player1_name'] ?? get_logged_user() ?? 'Player 1');
+        $player2_name = sanitize($_POST['player2_name'] ?? 'Player 2');
         init_game($difficulty, $players);
+        // Patch player names directly into session after init
+        $_SESSION['game']['player_names'] = [
+            0 => $player1_name ?: (get_logged_user() ?? 'Player 1'),
+            1 => $player2_name ?: 'Player 2'
+        ];
         $game = get_game_state();
     } elseif (isset($_POST['roll_dice']) && $game) {
         $current_player = $game['current_player'];
@@ -27,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $old_pos = $game['positions'][$current_player];
             $move_result = move_player($old_pos, $roll, $game['board']);
             $new_pos = $move_result['pos'];
+            $move_type = $move_result['type'];
             
             if ($move_result['type'] != 'normal') {
                 $narrator_message = get_narrator_message($move_result['type'], ['{to}' => $new_pos]);
@@ -40,12 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $game['events_log'][] = ['turn' => $game['turn_count'], 'player' => $current_player, 'event' => $event, 'pos' => $new_pos];
                 $game['last_event'] = $event;
                 $narrator_message = get_narrator_message($event['type'], ['{to}' => $new_pos, '{move}' => abs($event['move']), '{msg}' => $event['msg']]);
+                $move_type = $event['type'];
             }
             
             // Check bonus
             $bonus = check_bonus($new_pos);
             if ($bonus) {
                 $narrator_message = get_narrator_message($bonus, []);
+                $move_type = $bonus;
                 // Apply bonus effects
                 if ($bonus == 'extra_roll') {
                     // Allow extra roll, don't switch player
@@ -54,6 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $game['skipped_turns'][$next_player] = true;
                 }
             }
+
+            // Store last roll and move type so dice face and narrator color persist after reload
+            $game['last_roll']     = $roll;
+            $game['last_type']     = $move_type;
+            $game['last_narrator'] = $narrator_message;
             
             $game['positions'][$current_player] = $new_pos;
             
@@ -61,7 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (check_win($new_pos)) {
                 $winner = $current_player;
                 $time_played = time() - $game['start_time'];
-                update_leaderboard(get_logged_user(), $time_played, $game['difficulty']);
+                update_leaderboard($game['player_names'][$current_player], $time_played, $game['difficulty']);
+                $game['winner']      = $current_player;
+                $game['time_played'] = $time_played;
             } else {
                 // Switch player if not extra roll
                 if (!$bonus || $bonus != 'extra_roll') {
@@ -86,33 +103,89 @@ if (!$game) {
     exit;
 }
 
-// Generate board HTML
+// Restore winner and narrator from session after reload
+if (isset($game['winner'])) $winner = $game['winner'];
+if (!$narrator_message && !empty($game['last_narrator'])) {
+    $narrator_message = $game['last_narrator'];
+}
+
+$player_names = $game['player_names'] ?? ['0' => 'Player 1', '1' => 'Player 2'];
+$last_roll    = $game['last_roll'] ?? null;
+$dice_faces   = [1 => '⚀', 2 => '⚁', 3 => '⚂', 4 => '⚃', 5 => '⚄', 6 => '⚅'];
+
+// Determine if a popup should show for this roll
+$popup_type = $game['last_type'] ?? 'normal';
+$popup_msg  = $game['last_narrator'] ?? '';
+$big_events = ['snake', 'ladder', 'bonus', 'extra_roll', 'skip_turn', 'mystery_boost', 'warp', 'skip', 'penalty'];
+$show_popup = in_array($popup_type, $big_events) && $popup_msg !== '';
+
+// Also show popup on win
+if ($winner !== null) {
+    $show_popup  = true;
+    $popup_type  = 'win';
+    $popup_msg   = '🏆 ' . htmlspecialchars($player_names[$winner]) . ' Wins!';
+}
+
+$popup_icons = [
+    'snake'         => '🐍',
+    'ladder'        => '🪜',
+    'bonus'         => '⭐',
+    'extra_roll'    => '🎲',
+    'skip_turn'     => '⏸️',
+    'mystery_boost' => '❓',
+    'warp'          => '✨',
+    'skip'          => '⏸️',
+    'penalty'       => '😞',
+    'win'           => '🏆',
+];
+$popup_icon = $popup_icons[$popup_type] ?? '🎉';
+
 function generate_board($game) {
+    global $event_cells, $bonus_tiles;
+
+    $rows = [];
+    for ($row = 0; $row < 10; $row++) {
+        $cells = [];
+        for ($col = 0; $col < 10; $col++) {
+            $num = ($row % 2 === 0)
+                ? $row * 10 + $col + 1
+                : $row * 10 + (10 - $col);
+            $cells[] = $num;
+        }
+        array_unshift($rows, $cells);
+    }
+
     $board_html = '<div class="board">';
-    for ($i = 100; $i >= 1; $i--) {
-        $cell_class = 'cell';
-        if (isset($game['board']['snakes'][$i])) {
-            $cell_class .= ' snake';
-        } elseif (isset($game['board']['ladders'][$i])) {
-            $cell_class .= ' ladder';
-        }
-        if (isset($GLOBALS['event_cells'][$i])) {
-            $cell_class .= ' event';
-        }
-        if (isset($GLOBALS['bonus_tiles'][$i])) {
-            $cell_class .= ' bonus';
-        }
-        $active = ($i == $game['positions'][$game['current_player']]) ? ' active' : '';
-        $cell_class .= $active;
-        
-        $tokens = '';
-        foreach ($game['positions'] as $p => $pos) {
-            if ($pos == $i) {
-                $tokens .= '<div class="token player' . ($p + 1) . '"></div>';
+    foreach ($rows as $row_cells) {
+        foreach ($row_cells as $i) {
+            $cell_class = 'cell';
+            $token_type = '';
+
+            if (isset($game['board']['snakes'][$i])) {
+                $cell_class .= ' snake';
+                $token_type  = 'snake';
+            } elseif (isset($game['board']['ladders'][$i])) {
+                $cell_class .= ' ladder';
+                $token_type  = 'ladder';
             }
+            if (isset($event_cells[$i]))  $cell_class .= ' event';
+            if (isset($bonus_tiles[$i]))  $cell_class .= ' bonus';
+
+            $active = ($i == $game['positions'][$game['current_player']]) ? ' active' : '';
+            $cell_class .= $active;
+
+            $tokens = '';
+            foreach ($game['positions'] as $p => $pos) {
+                if ($pos == $i) {
+                    $tokens .= '<div class="token player' . ($p + 1) . ' ' . $token_type . '-token"></div>';
+                }
+            }
+
+            $board_html .= "<div class=\"{$cell_class}\" data-cell=\"{$i}\">";
+            $board_html .= "<span class=\"cell-num\">{$i}</span>";
+            $board_html .= $tokens;
+            $board_html .= "</div>";
         }
-        
-        $board_html .= "<div class=\"$cell_class\">$i$tokens</div>";
     }
     $board_html .= '</div>';
     return $board_html;
@@ -124,20 +197,76 @@ function generate_board($game) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game - Snakes, Ladders & Luck</title>
+    <title>Game - Snakes, Ladders &amp; Luck</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<?php if ($show_popup && $winner === null): ?>
+<div class="event-popup popup-<?= htmlspecialchars($popup_type) ?>" id="eventPopup">
+    <div class="popup-inner">
+        <span class="popup-icon"><?= $popup_icon ?></span>
+        <p class="popup-msg"><?= htmlspecialchars($popup_msg) ?></p>
+    </div>
+</div>
+<?php endif; ?>
+
     <div class="container">
-        <h1>Snakes, Ladders & Luck</h1>
+        <h1>Snakes, Ladders &amp; Luck</h1>
+
+        <nav class="site-nav">
+            <a href="index.php">🏠 Home</a>
+            <a href="leaderboard.php">🏆 Leaderboard</a>
+            <span class="nav-user">👤 <?= htmlspecialchars(get_logged_user()) ?></span>
+            <a href="logout.php">🚪 Logout</a>
+        </nav>
         
         <?php if ($winner !== null): ?>
-            <h2>🎉 Player <?php echo $winner + 1; ?> Wins! 🎉</h2>
-            <p><a href="leaderboard.php">📊 View Leaderboard</a></p>
-            <p><a href="index.php">🎮 Play Again</a></p>
+            <!-- Win Screen and Adventure Recap-->
+            <div class="winner-banner">
+                <h2>🎉 <?= htmlspecialchars($player_names[$winner]) ?> Wins! 🎉</h2>
+                <p>Time: <strong><?= gmdate("H:i:s", $game['time_played'] ?? 0) ?></strong>
+                &nbsp;|&nbsp; Turns: <strong><?= $game['turn_count'] ?></strong>
+                &nbsp;|&nbsp; Difficulty: <strong><?= ucfirst($game['difficulty']) ?></strong></p>
+            </div>
+
+            <!-- Adventure Recap  -->
+            <div class="adventure-recap">
+                <h3>📜 Adventure Recap</h3>
+                <?php if (!empty($game['events_log'])): ?>
+                <p class="recap-subtitle">Every twist and turn of your journey:</p>
+                <ul class="recap-list">
+                    <?php foreach ($game['events_log'] as $log): ?>
+                    <li>
+                        <span class="recap-turn">Turn <?= $log['turn'] ?></span>
+                        <span class="recap-player"><?= htmlspecialchars($player_names[$log['player']]) ?></span>
+                        <?php if (isset($log['type'])): ?>
+                            <?php if ($log['type'] === 'snake'): ?>
+                                🐍 Hit a snake at <?= $log['from'] ?> &rarr; slid down to <?= $log['to'] ?>
+                            <?php elseif ($log['type'] === 'ladder'): ?>
+                                🪜 Climbed a ladder at <?= $log['from'] ?> &rarr; shot up to <?= $log['to'] ?>
+                            <?php endif; ?>
+                        <?php elseif (isset($log['event'])): ?>
+                            ⚡ <?= htmlspecialchars($log['event']['msg']) ?> at cell <?= $log['pos'] ?>
+                        <?php endif; ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php else: ?>
+                <p>A clean run there was no snakes, ladders, or events triggered!</p>
+                <?php endif; ?>
+            </div>
+
+            <p style="text-align:center; margin-top:20px;">
+                <a href="leaderboard.php">📊 View Leaderboard</a>
+                &nbsp;&nbsp;
+                <a href="index.php">🎮 Play Again</a>
+            </p>
+
         <?php else: ?>
+            <!--Active Game -->
             <div class="game-info">
-                <div>👤 Player's Turn: <?php echo $game['current_player'] + 1; ?></div>
+                <div>👤 <?= htmlspecialchars($player_names[$game['current_player']]) ?>'s Turn</div>
                 <div>📍 Turn: <?php echo $game['turn_count']; ?></div>
                 <div>⚙️ Difficulty: <?php echo ucfirst($game['difficulty']); ?></div>
             </div>
@@ -176,8 +305,17 @@ function generate_board($game) {
                 <div class="players-info">
                     <?php foreach ($game['positions'] as $p => $pos): ?>
                         <div class="player-card player<?php echo $p + 1; ?><?php echo ($p == $game['current_player']) ? ' active' : ''; ?>">
-                            <div class="player-name">🎯 Player <?php echo $p + 1; ?></div>
+                            <div class="player-name">
+                                <?= $p === 0 ? '🔴' : '🟢' ?>
+                                <?= htmlspecialchars($player_names[$p]) ?>
+                            </div>
                             <div class="player-position"><?php echo $pos; ?>/100</div>
+                            <!-- Progress bar -->
+                            <div class="progress-wrap">
+                                <div class="progress-bar player<?= $p + 1 ?>-bar"
+                                    style="width:<?= $pos ?>%"></div>
+                            </div>
+                            <div class="progress-label"><?= $pos ?>% to finish</div>
                             <div class="player-status">
                                 <?php if ($p == $game['current_player']): ?>
                                     <strong>▶️ Your Turn!</strong>
@@ -189,19 +327,34 @@ function generate_board($game) {
                             </div>
                         </div>
                     <?php endforeach; ?>
+
+                    <!-- Animated dice face -->
+                    <div class="dice-panel">
+                        <div class="dice-face <?= $last_roll ? 'rolled' : '' ?>">
+                            <?= $last_roll ? $dice_faces[$last_roll] : '🎲' ?>
+                        </div>
+                        <?php if ($last_roll): ?>
+                            <p class="dice-label">Last roll: <strong><?= $last_roll ?></strong></p>
+                        <?php else: ?>
+                            <p class="dice-label">Roll to start!</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
             
             <div class="game-controls">
                 <form method="post">
-                    <button type="submit" name="roll_dice">🎲 Roll Dice!</button>
+                    <button type="submit" name="roll_dice"
+                            class="roll-btn <?= htmlspecialchars($game['last_type'] ?? '') ?>">
+                        🎲 Roll Dice!
+                    </button>
                 </form>
             </div>
             
             <?php if ($narrator_message): ?>
-                <div class="narrator">
+                <div class="narrator narrator-<?= htmlspecialchars($game['last_type'] ?? 'normal') ?>">
                     <h3>🎭 Narrator</h3>
-                    <p><?php echo $narrator_message; ?></p>
+                    <p><?php echo htmlspecialchars($narrator_message); ?></p>
                 </div>
             <?php endif; ?>
             
@@ -209,7 +362,10 @@ function generate_board($game) {
             <div class="dice-history">
                 <ul>
                     <?php foreach (array_reverse($game['dice_history']) as $history): ?>
-                        <li>🎲 Player <?php echo $history['player'] + 1; ?> rolled <strong><?php echo $history['roll']; ?></strong> (Turn <?php echo $history['turn']; ?>)</li>
+                        <li>🎲 <?= htmlspecialchars($player_names[$history['player']]) ?> rolled
+                            <strong><?php echo $history['roll']; ?></strong>
+                            (Turn <?php echo $history['turn']; ?>)
+                        </li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -218,11 +374,11 @@ function generate_board($game) {
             <div class="event-log">
                 <ul>
                     <?php foreach ($game['events_log'] as $log): ?>
-                        <li>Turn <?php echo $log['turn']; ?> - Player <?php echo $log['player'] + 1; ?>: 
+                        <li>Turn <?php echo $log['turn']; ?> - <?= htmlspecialchars($player_names[$log['player']]) ?>: 
                             <?php if (isset($log['type'])): ?>
                                 <?php echo ucfirst($log['type']); ?> from <?php echo $log['from']; ?> to <?php echo $log['to']; ?>
                             <?php elseif (isset($log['event'])): ?>
-                                <?php echo $log['event']['msg']; ?> at <?php echo $log['pos']; ?>
+                                <?php echo htmlspecialchars($log['event']['msg']); ?> at <?php echo $log['pos']; ?>
                             <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
