@@ -3,7 +3,7 @@
 require_once 'config.php';
 require_once 'functions.php';
 
-// Only clear login state and game this keep users and leaderboard intact
+// keeps users and leaderboard intact
 unset($_SESSION['user']);
 unset($_SESSION['game']);
 ?>
