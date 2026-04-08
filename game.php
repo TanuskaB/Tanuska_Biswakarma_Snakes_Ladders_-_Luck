@@ -142,6 +142,32 @@ function generate_board($game) {
                 <div>⚙️ Difficulty: <?php echo ucfirst($game['difficulty']); ?></div>
             </div>
             
+            <div class="symbols-guide">
+                <h3>🎯 Game Symbols Guide</h3>
+                <div class="symbols-list">
+                    <div class="symbol-item">
+                        <span class="symbol">🐍</span>
+                        <span class="description">Snake - Slide down to a lower number!</span>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol">🪜</span>
+                        <span class="description">Ladder - Climb up to a higher number!</span>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol">⚡</span>
+                        <span class="description">Event - Special random events that can help or hinder!</span>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol">⭐</span>
+                        <span class="description">Bonus - Lucky tiles that give extra rolls or special advantages!</span>
+                    </div>
+                    <div class="symbol-item">
+                        <span class="symbol">🎯</span>
+                        <span class="description">Player Token - Shows where each player is on the board!</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="game-container">
                 <div class="game-board-wrapper">
                     <?php echo generate_board($game); ?>
