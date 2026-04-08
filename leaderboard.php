@@ -46,7 +46,7 @@ $leaderboard = get_scores();
                 <?php if (empty($leaderboard)): ?>
                 <tr>
                     <td colspan="5" style="text-align:center; padding:20px;">
-                        No games completed yet. <a href="index.php">Play now!</a> 🎮
+                        No games completed yet. <a href="game.php">Play now!</a> 🎮
                     </td>
                 </tr>
                 <?php else: ?>
