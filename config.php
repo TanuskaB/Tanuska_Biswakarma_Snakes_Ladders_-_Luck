@@ -82,11 +82,10 @@ $narrator_templates = [
     'bonus' => "🎉 {msg} Move {move} spaces!",
     'penalty' => "😞 {msg} Move back {move} spaces!",
     'skip' => "⏸️ {msg}",
-    'warp' => "✨ {msg} You warp ahead to cell {to}!",
+    'warp' => "✨ {msg} Move to cell {to}!",
     'extra_roll' => "🎲 Lucky tile! Roll again!",
-    'skip_turn' => "😴 Bonus tile! Your opponent's next turn is skipped.",
-    'mystery_boost' => "❓ Mystery boost! A random power surges through the board."
-    'normal' =>  "🎯 Moved to cell {to}."
+    'skip_turn' => "😴 Bonus tile! Skip opponent's turn.",
+    'mystery_boost' => "❓ Mystery boost! Random effect applied."
 ];
 
 // Start session if not already

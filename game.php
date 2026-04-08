@@ -142,6 +142,7 @@ function generate_board($game) {
                 <div>⚙️ Difficulty: <?php echo ucfirst($game['difficulty']); ?></div>
             </div>
             
+<<<<<<< HEAD
             <div class="symbols-guide">
                 <h3>🎯 Game Symbols Guide</h3>
                 <div class="symbols-list">
@@ -168,6 +169,8 @@ function generate_board($game) {
                 </div>
             </div>
             
+=======
+>>>>>>> 2027525 (Initial commit)
             <div class="game-container">
                 <div class="game-board-wrapper">
                     <?php echo generate_board($game); ?>

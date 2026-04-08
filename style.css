@@ -28,7 +28,11 @@ h1 {
     color: white;
     padding: 25px;
     border-radius: 15px;
+<<<<<<< HEAD
     font-size: 40px;
+=======
+    font-size: 2.5em;
+>>>>>>> 2027525 (Initial commit)
     margin: 0 0 20px 0;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     letter-spacing: 2px;
@@ -37,14 +41,22 @@ h1 {
 h2 {
     text-align: center;
     color: #ff6b9d;
+<<<<<<< HEAD
     font-size: 29px;
+=======
+    font-size: 1.8em;
+>>>>>>> 2027525 (Initial commit)
     margin: 20px 0 15px 0;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 h3 {
     color: #667eea;
+<<<<<<< HEAD
     font-size: 21px;
+=======
+    font-size: 1.3em;
+>>>>>>> 2027525 (Initial commit)
     margin-top: 15px;
 }
 
@@ -74,8 +86,13 @@ h3 {
 .player-card {
     background: white;
     border: 3px solid;
+<<<<<<< HEAD
     border-radius: 10px;
     padding: 11px;
+=======
+    border-radius: 12px;
+    padding: 15px;
+>>>>>>> 2027525 (Initial commit)
     text-align: center;
     font-weight: bold;
     transition: all 0.3s ease;
@@ -98,18 +115,30 @@ h3 {
 }
 
 .player-name {
+<<<<<<< HEAD
     font-size: 19px;
+=======
+    font-size: 1.2em;
+>>>>>>> 2027525 (Initial commit)
     margin-bottom: 8px;
 }
 
 .player-position {
+<<<<<<< HEAD
     font-size: 24px;
+=======
+    font-size: 1.5em;
+>>>>>>> 2027525 (Initial commit)
     font-weight: bold;
     margin: 10px 0;
 }
 
 .player-status {
+<<<<<<< HEAD
     font-size: 14px;
+=======
+    font-size: 0.9em;
+>>>>>>> 2027525 (Initial commit)
     padding: 8px;
     background: rgba(255,255,255,0.6);
     border-radius: 6px;
@@ -254,7 +283,11 @@ label {
     margin-bottom: 8px;
     color: #764ba2;
     font-weight: bold;
+<<<<<<< HEAD
     font-size: 18px;
+=======
+    font-size: 1.1em;
+>>>>>>> 2027525 (Initial commit)
 }
 
 input[type="text"], input[type="password"], select {
@@ -345,13 +378,21 @@ button:active {
     margin: 20px 0;
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0, 212, 255, 0.3);
+<<<<<<< HEAD
     font-size: 17px;
+=======
+    font-size: 1.05em;
+>>>>>>> 2027525 (Initial commit)
 }
 
 .narrator h3 {
     color: #00a8cc;
     margin: 0 0 10px 0;
+<<<<<<< HEAD
     font-size: 22px;
+=======
+    font-size: 1.4em;
+>>>>>>> 2027525 (Initial commit)
 }
 
 .narrator p {
@@ -381,7 +422,11 @@ button:active {
     border: 1px solid #e0e0e0;
     padding: 14px;
     text-align: left;
+<<<<<<< HEAD
     font-size: 17px;
+=======
+    font-size: 1.05em;
+>>>>>>> 2027525 (Initial commit)
 }
 
 .leaderboard th {
@@ -417,7 +462,11 @@ button:active {
     padding: 15px 22px;
     border-radius: 10px;
     font-weight: bold;
+<<<<<<< HEAD
     font-size: 18px;
+=======
+    font-size: 1.1em;
+>>>>>>> 2027525 (Initial commit)
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     text-align: center;
     flex: 1;
@@ -447,7 +496,11 @@ button:active {
     background: white;
     border-left: 4px solid #667eea;
     border-radius: 4px;
+<<<<<<< HEAD
     font-size: 15px;
+=======
+    font-size: 0.95em;
+>>>>>>> 2027525 (Initial commit)
 }
 
 @keyframes slide {
@@ -501,13 +554,18 @@ a:hover {
     }
     
     h1 {
+<<<<<<< HEAD
         font-size: 29px;
+=======
+        font-size: 1.8em;
+>>>>>>> 2027525 (Initial commit)
     }
     
     button {
         padding: 10px 20px;
         font-size: 14px;
     }
+<<<<<<< HEAD
 }
 
 /* Game Symbols Guide */
@@ -580,4 +638,6 @@ a:hover {
     .description {
         font-size: 14px;
     }
+=======
+>>>>>>> 2027525 (Initial commit)
 }
