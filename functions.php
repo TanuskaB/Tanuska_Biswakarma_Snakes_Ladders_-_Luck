@@ -43,7 +43,7 @@ function apply_event($event, &$pos) {
     switch ($event['type']) {
         case 'bonus':
         case 'penalty':
-            $pos = max(1, min(100, $pos + $event['move']));
+            $pos += $event['move'];
             break;
         case 'warp':
             $pos = min(100, $pos + $event['move']);
@@ -61,14 +61,17 @@ function check_bonus($pos) {
     return isset($bonus_tiles[$pos]) ? $bonus_tiles[$pos] : null;
 }
 
+// Apply bonus
+function apply_bonus($bonus_type) {
+    // Return effect
+    return $bonus_type;
+}
+
 // Generate narrator message
 function get_narrator_message($type, $data) {
     global $narrator_templates;
     $template = $narrator_templates[$type] ?? "Something happened!";
-    foreach ($data as $key => $value) {
-        $template = str_replace($key, $value, $template);
-    }
-    return $template;
+    return str_replace(array_keys($data), array_values($data), $template);
 }
 
 // Check win
@@ -142,23 +145,18 @@ function register_user($username, $password) {
     if (!isset($_SESSION['users'])) {
         $_SESSION['users'] = [];
     }
-    // Check case-insensitively
-    foreach ($_SESSION['users'] as $key => $hash) {
-        if (strtolower($key) === strtolower($username)) return false;
+    if (isset($_SESSION['users'][$username])) {
+        return false; // User exists
     }
     $_SESSION['users'][$username] = password_hash($password, PASSWORD_DEFAULT);
     return true;
 }
 
 function login_user($username, $password) {
-    if (!isset($_SESSION['users'])) return false;
-    // Check case-insensitively
-    foreach ($_SESSION['users'] as $key => $hash) {
-        if (strtolower($key) === strtolower($username)) {
-            return password_verify($password, $hash);
-        }
+    if (!isset($_SESSION['users'][$username])) {
+        return false;
     }
-    return false;
+    return password_verify($password, $_SESSION['users'][$username]);
 }
 
 function is_logged_in() {
@@ -178,23 +176,29 @@ function sanitize($input) {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
 
-// Validate registration form
+// Validate form
 function validate_registration($username, $password, $confirm) {
     $errors = [];
-    if (empty($username) || strlen($username) < 3)
+    if (empty($username) || strlen($username) < 3) {
         $errors[] = "Username must be at least 3 characters.";
-    if (empty($password) || strlen($password) < 6)
+    }
+    if (empty($password) || strlen($password) < 6) {
         $errors[] = "Password must be at least 6 characters.";
-    if ($password !== $confirm)
+    }
+    if ($password !== $confirm) {
         $errors[] = "Passwords do not match.";
+    }
     return $errors;
 }
 
-// Validate login form
 function validate_login($username, $password) {
     $errors = [];
-    if (empty($username)) $errors[] = "Username is required.";
-    if (empty($password)) $errors[] = "Password is required.";
+    if (empty($username)) {
+        $errors[] = "Username is required.";
+    }
+    if (empty($password)) {
+        $errors[] = "Password is required.";
+    }
     return $errors;
 }
 ?>
