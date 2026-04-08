@@ -29,7 +29,7 @@ session_destroy();
     <div class="logout-box">
         <span class="logout-icon">👋</span>
         <h2>You've been logged out!</h2>
-        <p>Thanks for playing — hope to see you back soon!</p>
+        <p>Thanks for playing, hope to see you back soon!</p>
         <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
             <a href="login.php" class="btn-link">🔓 Log In Again</a>
             <a href="register.php" class="btn-link">📝 Register</a>
