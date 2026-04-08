@@ -579,7 +579,8 @@ a:hover {
     }
 }
 
-/* Animation keyframes */
+
+/* Animation keyframes  */
 
 /* h1 gradient shift */
 @keyframes adventureTitle {
@@ -605,7 +606,7 @@ a:hover {
     50%       { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(81,207,102,0.8); }
 }
 
-/* Cell shine and scale */
+/* Bonus cell shine + scale */
 @keyframes bonusShine {
     0%, 100% { transform: scale(1);    box-shadow: 0 0 12px rgba(233,30,99,0.7); }
     50%       { transform: scale(1.07); box-shadow: 0 0 22px rgba(233,30,99,1); }
@@ -641,7 +642,7 @@ a:hover {
     to   { transform: rotate(0deg)  scale(1);    opacity: 1; }
 }
 
-/* Token landing animations  */
+/* Token landing animations*/
 .token.snake-token {
     animation: slideDown 0.7s ease forwards;
 }
@@ -660,7 +661,7 @@ a:hover {
     100% { transform: translateY(0); opacity: 1; }
 }
 
-/*  Narrator color variants  */
+/* Narrator color variants */
 .narrator-snake   { border-color: #ff6b6b !important; background: linear-gradient(135deg, #ffe0e0, #fff3bf) !important; }
 .narrator-ladder  { border-color: #51cf66 !important; background: linear-gradient(135deg, #e0ffe8, #e0f7ff) !important; }
 .narrator-bonus,
@@ -677,7 +678,7 @@ a:hover {
 .roll-btn.bonus,
 .roll-btn.extra_roll   { box-shadow: 0 5px 20px rgba(156,39,176,0.6); }
 
-/* Navbar  */
+/*  Navbar  */
 .site-nav {
     display: flex;
     align-items: center;
@@ -714,7 +715,7 @@ a:hover {
     text-shadow: none;
 }
 
-/*  Progress bar*/
+/* Progress bar */
 .progress-wrap {
     background: #e9e0ff;
     border-radius: 20px;
@@ -733,7 +734,7 @@ a:hover {
 .player2-bar { background: linear-gradient(90deg, #99ff99, #00aa00); }
 .progress-label { font-size: 0.78em; color: #888; text-align: right; margin-bottom: 6px; }
 
-/*  Animated dice face  */
+/*  Animated dice face */
 .dice-panel {
     background: white;
     border: 3px solid #667eea;
@@ -760,7 +761,7 @@ a:hover {
 }
 .dice-label { font-size: 0.88em; color: #764ba2; font-weight: bold; margin: 0; }
 
-/* Winner banner*/
+/*  Winner banner */
 .winner-banner {
     text-align: center;
     background: linear-gradient(90deg, #667eea, #764ba2, #ff6b9d, #00d4ff, #667eea);
@@ -774,7 +775,7 @@ a:hover {
 .winner-banner h2 { color: white; margin: 0 0 8px; text-shadow: 1px 2px 4px rgba(0,0,0,0.25); }
 .winner-banner p  { color: rgba(255,255,255,0.9); font-size: 1.05em; margin: 0; }
 
-/* Adventure recap  */
+/*  Adventure recap  */
 .adventure-recap {
     background: linear-gradient(135deg, #f0e7ff, #e0f7ff);
     border: 3px solid #764ba2;
@@ -862,7 +863,7 @@ a:hover {
 .popup-warp    { background: linear-gradient(135deg, #0077b6, #00d4ff); border: 4px solid #b3ecff; }
 .popup-win     { background: linear-gradient(135deg, #667eea, #764ba2, #ff6b9d); border: 4px solid #ffd700; }
 
-/* How to Play  */
+/*  How to Play */
 .how-to-play {
     margin-top: 35px;
     padding: 25px;
@@ -953,7 +954,82 @@ a:hover {
 .event-rule  { background: linear-gradient(135deg, #ffd93d, #ff9d3d); color: #333; }
 .bonus-rule  { background: linear-gradient(135deg, #9c27b0, #e91e63); }
 
-/* Game mode toggle */
+/*  Win confetti */
+.confetti-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 998;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -20px;
+    animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+    0%   { transform: translateY(0)    rotate(0deg);   opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+
+/* Special tiles grid (howtoplay.php)  */
+.special-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.special-tile {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    border-top: 4px solid #764ba2;
+}
+
+.special-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+.special-tile strong { color: #764ba2; display: block; margin-bottom: 6px; font-size: 15px; }
+.special-tile p { color: #555; font-size: 13px; margin: 0; }
+
+/*  Difficulty table  */
+.diff-table-wrap { overflow-x: auto; margin-top: 12px; }
+
+.diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.diff-table th {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 15px;
+}
+
+.diff-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 15px;
+}
+
+.diff-table tr:last-child td { border-bottom: none; }
+.diff-table tr:nth-child(odd)  { background: #f9f9f9; }
+.diff-table tr:nth-child(even) { background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(0,212,255,0.05)); }
+.diff-table tr:hover td        { background: linear-gradient(135deg, #d4daff, #d4f4ff); }
+
+/* Game mode toggle  */
 .mode-toggle {
     display: flex;
     gap: 12px;
