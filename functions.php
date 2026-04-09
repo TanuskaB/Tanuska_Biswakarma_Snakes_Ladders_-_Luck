@@ -109,6 +109,8 @@ function init_game($difficulty, $player2_name = 'Player 2', $players = 2) {
         'last_narrator'  => '',
         'last_roll'      => null,
         'start_time'     => time(),
+        'turn_start_time'=> time(),
+        'turn_durations' => [],
         'skipped_turns'  => array_fill(0, $players, false)
     ];
 }

@@ -32,8 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (isset($_POST['roll_dice']) && $game) {
         $current_player = $game['current_player'];
         if (!$game['skipped_turns'][$current_player]) {
+            $turn_elapsed = isset($_POST['turn_elapsed']) ? (int)$_POST['turn_elapsed'] : (time() - ($game['turn_start_time'] ?? time()));
+            $game['turn_durations'][] = [
+                'turn'     => $game['turn_count'],
+                'player'   => $current_player,
+                'duration' => $turn_elapsed
+            ];
             $roll = roll_dice();
-            $game['dice_history'][] = ['player' => $current_player, 'roll' => $roll, 'turn' => $game['turn_count']];
+            $game['dice_history'][] = ['player' => $current_player, 'roll' => $roll, 'turn' => $game['turn_count'], 'duration' => $turn_elapsed];
             
             $old_pos = $game['positions'][$current_player];
             $move_result = move_player($old_pos, $roll, $game['board']);
@@ -90,10 +96,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             
             $game['turn_count']++;
+            $game['turn_start_time'] = time();
             $_SESSION['game'] = $game;
         } else {
             $game['skipped_turns'][$current_player] = false;
             $game['current_player'] = ($current_player + 1) % count($game['positions']);
+            $game['turn_start_time'] = time();
             $_SESSION['game'] = $game;
         }
     }
@@ -371,6 +379,7 @@ function generate_board($game) {
             <div class="game-info">
                 <div>👤 <?= htmlspecialchars($player_names[$game['current_player']]) ?>'s Turn</div>
                 <div>📍 Turn: <?php echo $game['turn_count']; ?></div>
+                <div>⏱️ Turn Time: <span id="turnTimer">0s</span></div>
                 <div>⚙️ Difficulty: <?php echo ucfirst($game['difficulty']); ?></div>
             </div>
             
@@ -444,7 +453,8 @@ function generate_board($game) {
             </div>
             
             <div class="game-controls">
-                <form method="post">
+                <form method="post" id="rollForm">
+                    <input type="hidden" name="turn_elapsed" id="turnElapsedInput" value="0">
                     <button type="submit" name="roll_dice"
                             class="roll-btn <?= htmlspecialchars($game['last_type'] ?? '') ?>">
                         🎲 Roll Dice!
@@ -466,6 +476,9 @@ function generate_board($game) {
                         <li>🎲 <?= htmlspecialchars($player_names[$history['player']]) ?> rolled
                             <strong><?php echo $history['roll']; ?></strong>
                             (Turn <?php echo $history['turn']; ?>)
+                            <?php if (isset($history['duration'])): ?>
+                                — <em><?php echo $history['duration']; ?>s</em>
+                            <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -489,5 +502,28 @@ function generate_board($game) {
         
         <p><a href="index.php">Back to Home</a></p>
     </div>
+    <script>
+        (function() {
+            const timerElement = document.getElementById('turnTimer');
+            const elapsedInput = document.getElementById('turnElapsedInput');
+            const rollForm = document.getElementById('rollForm');
+            if (!timerElement || !elapsedInput || !rollForm) return;
+
+            let elapsed = 0;
+            timerElement.textContent = '0s';
+            elapsedInput.value = '0';
+
+            const intervalId = setInterval(() => {
+                elapsed += 1;
+                timerElement.textContent = elapsed + 's';
+                elapsedInput.value = elapsed;
+            }, 1000);
+
+            rollForm.addEventListener('submit', function() {
+                elapsedInput.value = elapsed;
+                clearInterval(intervalId);
+            });
+        })();
+    </script>
 </body>
 </html>
