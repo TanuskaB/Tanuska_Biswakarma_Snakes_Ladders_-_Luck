@@ -8,7 +8,7 @@ if (!is_logged_in()) {
     exit;
 }
 
-// Clear session game when starting a new one
+// Clear session game when starting a new one (int)
 if (isset($_GET['new'])) {
     unset($_SESSION['game']);
 }
@@ -20,7 +20,7 @@ $winner           = null;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['start_game'])) {
         $difficulty   = $_POST['difficulty'];
-        $players      = (int)$_POST['players'];
+        $players      = (int)($_POST['players'] ?? 2);
         $player1_name = sanitize($_POST['player1_name'] ?? get_logged_user() ?? 'Player 1');
         $player2_name = $players === 1 ? 'CPU' : sanitize($_POST['player2_name'] ?? 'Player 2');
         init_game($difficulty, $players);
@@ -134,7 +134,7 @@ if (!$game) {
         <div class="game-setup-wrap">
             <h2>🎮 Set Up Your Game</h2>
             <form action="game.php" method="post">
-
+                
                 <div class="form-group">
                     <label for="player1_name">🔴 Player 1 Name:</label>
                     <input type="text"
@@ -145,6 +145,7 @@ if (!$game) {
                             maxlength="20"
                             required>
                 </div>
+                
 
                 <div class="form-group">
                     <label>👥 Game Mode:</label>
@@ -154,12 +155,13 @@ if (!$game) {
                             <span class="mode-btn">🎮 Solo</span>
                         </label>
                         <label class="mode-option">
-                            <input type="radio" name="players" value="2" id="multi" checked>
+                            <input type="radio" name="players" value="2" id="multi">
                             <span class="mode-btn">🎮🎮 Multiplayer</span>
                         </label>
                     </div>
                 </div>
 
+               
                 <div class="form-group">
                     <label for="player2_name">🟢 Player 2 Name: </label>
                     <input type="text"
@@ -168,6 +170,7 @@ if (!$game) {
                             placeholder="Enter Player 2 name or leave blank for CPU"
                             maxlength="20">
                 </div>
+                
 
                 <div class="form-group">
                     <label for="difficulty">🎯 Difficulty Level:</label>
