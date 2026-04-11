@@ -20,9 +20,10 @@ and visually engaging.
 * View top scores and rankings of all users
 
 # Team Members
-Name	Student ID	Primary Contribution
-Tanuska Biswakarma	002682850 	Login/Register system, session handling, backend PHP logic
-Caira Major	002681888 	Frontend UI design, CSS styling, navigation flow, game interface
+| Name | Student ID | Primary Contribution |
+| -------- | -------- | -------- |
+| Tanuska Biswakarma | 002682850 | Login/Register system, session handling, backend PHP logic |
+| Caira Major | 002681888 | Frontend UI design, CSS styling, navigation flow, game interface |
 
 # Live CODD URL
 https://codd.cs.gsu.edu/~tbiswakarma1/wp/project/Tanuska_Biswakarma_Snakes_Ladders_Luck/index.php
