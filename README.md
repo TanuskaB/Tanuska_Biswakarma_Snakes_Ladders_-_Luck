@@ -19,6 +19,53 @@ and visually engaging.
 * Scores are recorded and stored
 * View top scores and rankings of all users
 
+# Deployment Instructions
+This project is hosted on the Georgia State CODD server. The files were uploaded using FileZilla via FTP.
+Follow these steps to deploy and run the project.
+
+1. Clone the Repository
+Clone the project to your local machine:
+git clone https://github.com/TanuskaB/Tanuska_Biswakarma_Snakes_Ladders_-_Luck.git
+
+2. Connect to the CODD Server
+Open FileZilla and connect using your GSU credentials.
+Typical connection settings:
+Host: codd.cs.gsu.edu
+Username: your GSU username
+Password: your GSU password
+Port: 22
+Once connected, navigate to your public web directory.
+
+3. Upload the Project Files
+Upload the entire project folder to:
+public_html/wp/project/
+Example structure:
+public_html
+ └── wp
+     └── project
+         └── Snakes_Ladder_Luck
+                index.php
+                login.php
+                register.php
+                game.php
+                howtoplay.php
+                leaderboard.php
+                logout.php
+                style.css
+                config.php
+                functions.php
+                
+4. Access the Project
+After uploading the files, open the project in a browser using:
+https://codd.cs.gsu.edu/~username/wp/project/project-folder/index.php
+Example:
+https://codd.cs.gsu.edu/~cmajor7/wp/project/Snakes_Ladders_Luck/index.php
+5. Run the Game
+Register a new account
+Log in
+Start the game
+Roll the dice and move across the board
+
 # Team Members
 | Name | Student ID | Primary Contribution |
 | -------- | -------- | -------- |
