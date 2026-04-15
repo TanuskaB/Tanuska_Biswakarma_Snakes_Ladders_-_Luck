@@ -40,20 +40,22 @@ Once connected, navigate to your public web directory.
 Upload the entire project folder to:
 public_html/wp/project/
 Example structure:
-public_html
- └── wp
-     └── project
-         └── Snakes_Ladder_Luck
-                index.php
-                login.php
-                register.php
-                game.php
-                howtoplay.php
-                leaderboard.php
-                logout.php
-                style.css
-                config.php
-                functions.php
+```
+public_html/
+└── wp/
+    └── project/
+        └── Snakes_Ladder_Luck/
+            ├── index.php
+            ├── login.php
+            ├── register.php
+            ├── game.php
+            ├── howtoplay.php
+            ├── leaderboard.php
+            ├── logout.php
+            ├── style.css
+            ├── config.php
+            └── functions.php
+```
                 
 4. Access the Project
 After uploading the files, open the project in a browser using:
