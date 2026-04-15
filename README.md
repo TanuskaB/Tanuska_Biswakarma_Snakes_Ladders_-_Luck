@@ -60,8 +60,9 @@ public_html/
 4. Access the Project
 After uploading the files, open the project in a browser using:
 https://codd.cs.gsu.edu/~username/wp/project/project-folder/index.php
-# Example:
+## Example:
 https://codd.cs.gsu.edu/~cmajor7/wp/project/Snakes_Ladders_Luck/index.php
+
 5. Run the Game
 Register a new account
 - Log in
